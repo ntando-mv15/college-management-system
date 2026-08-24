@@ -1,4 +1,5 @@
-FROM node:20-alpine
+# ---- Stage 1: Build ----
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
@@ -12,8 +13,11 @@ ENV REACT_APP_APILINK=$REACT_APP_APILINK
 
 RUN npm run build
 
-RUN npm install -g serve
+# ---- Stage 2: Serve ----
+FROM nginx:alpine
 
-EXPOSE 3000
+COPY --from=build /app/build /usr/share/nginx/html
 
-CMD ["serve", "-s", "build", "-l", "3000"]
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
